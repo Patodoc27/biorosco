@@ -1,0 +1,16 @@
+# BIOROSCO: sitio estático (index.html + app.js + palabras.js). Sin build ni dependencias.
+maintenance: |
+  python3 -m pip install --user playwright || true
+knowledge:
+  - name: serve
+    contents: |
+      python3 -m http.server 8890  # servir el repo para pruebas locales
+  - name: test
+    contents: |
+      # Pruebas UI: playwright vía CDP a http://localhost:29229 (contexts de 420x860).
+      # Para online: dos contexts separados simulan dos celulares.
+  - name: notes
+    contents: |
+      # JS ES2017 solamente (sin ?. ?? .at() Object.fromEntries .flat).
+      # RANKING_URL en app.js queda vacío hasta que Patricia cree su planilla
+      # (ver instrucciones_ranking.md + ranking.gs).
