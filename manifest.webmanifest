@@ -1,0 +1,17 @@
+{
+  "name": "BIOROSCO · El desafío de la vida",
+  "short_name": "BIOROSCO",
+  "description": "Rosco de biología para celular: jugá sola, contra Boti o en línea con tu compañero.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#061a2b",
+  "theme_color": "#061a2b",
+  "lang": "es",
+  "icons": [
+    { "src": "icono-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icono-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icono-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

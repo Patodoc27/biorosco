@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
+<title>BIOROSCO · El desafío de la vida</title>
+<meta name="description" content="BIOROSCO: el rosco de biología de Salta. Jugá sola, contra Boti o en línea con tu compañero.">
+<meta name="theme-color" content="#061a2b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BIOROSCO">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icono-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --turq:#19E3D0;--cian:#22B8F0;--verde:#3FD97C;--rojo:#FF4D5E;--azul:#4C9DFF;--ambar:#FFC94A;--oro:#F5C542;
+  --j1:#19E3D0;--j2:#FF7AB8;
+  --texto:#F2FAFF;--suave:#B3CADB;--tenue:#7F9AAE;
+  --vidrio:rgba(9,28,46,.66);--vidrio2:rgba(14,40,62,.78);--borde:rgba(140,225,235,.22);--borde2:rgba(140,225,235,.38);
+  --letra:rgba(10,30,50,.82);--letra-b:rgba(190,235,245,.55);
+  --velo-a:rgba(4,16,28,.15);--velo-b:rgba(4,16,28,.82);
+  --sombra:0 10px 30px -12px rgba(0,0,0,.6);
+  --display:"Russo One","Arial Black",system-ui,sans-serif;
+  --cuerpo:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --btn-txt:#05233A;
+}
+[data-tema="claro"]{
+  --texto:#0B2A3F;--suave:#35556B;--tenue:#5F7B8E;
+  --vidrio:rgba(255,255,255,.80);--vidrio2:rgba(255,255,255,.90);--borde:rgba(10,70,100,.16);--borde2:rgba(10,120,140,.35);
+  --letra:rgba(255,255,255,.92);--letra-b:rgba(10,80,110,.35);
+  --velo-a:rgba(255,255,255,.05);--velo-b:rgba(240,250,252,.72);
+  --sombra:0 10px 28px -14px rgba(10,40,60,.45);
+  --turq:#0BB5A6;--verde:#1FAE5B;--rojo:#E8364A;--azul:#2D7FE0;--ambar:#D9930A;--j1:#0BB5A6;--j2:#E0438F;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:var(--cuerpo);color:var(--texto);background:#061a2b;overflow:hidden;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input{font:inherit;color:inherit}
+svg{display:block}
+.oculto{display:none!important}
+
+/* ===== PANTALLAS ===== */
+.pantalla{position:fixed;inset:0;display:none;flex-direction:column;overflow-y:auto;overflow-x:hidden;
+  background:#061a2b var(--fondo) center/cover no-repeat;-webkit-overflow-scrolling:touch}
+.pantalla.activa{display:flex;animation:entra .35s ease}
+@keyframes entra{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.pantalla::before{content:"";position:fixed;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,var(--velo-a) 0%,var(--velo-a) 30%,var(--velo-b) 100%)}
+.cont{position:relative;z-index:1;width:100%;max-width:520px;margin:0 auto;flex:1;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top,0px) + 14px) 18px calc(env(safe-area-inset-bottom,0px) + 18px)}
+#p-inicio{--fondo:url(fondos/inicio.webp)}
+#p-registro,#p-sala{--fondo:url(fondos/registro.webp)}
+#p-rosco{--fondo:url(fondos/rosco.webp);overflow:hidden}
+#p-resultado{--fondo:url(fondos/resultado.webp)}
+#p-ranking,#p-perfil,#p-acerca{--fondo:url(fondos/ranking.webp)}
+#p-registro{background-position:center 72%}
+
+/* barra superior */
+.top{display:flex;align-items:center;gap:10px;min-height:44px}
+.top h1,.top h2{flex:1;text-align:center;font-family:var(--display);font-weight:400;font-size:22px;letter-spacing:.02em;text-shadow:0 2px 10px rgba(0,0,0,.35)}
+.ico-btn{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;flex:none;background:var(--vidrio);border:1px solid var(--borde);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.ico-btn svg{width:22px;height:22px}
+.ico-btn.sin{background:none;border-color:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
+.ico-btn.off{opacity:.55}
+.vidrio{background:var(--vidrio);border:1px solid var(--borde);border-radius:20px;-webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2);box-shadow:var(--sombra)}
+
+/* botones */
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;min-height:56px;border-radius:999px;padding:0 26px;
+  font-family:var(--display);font-size:20px;letter-spacing:.04em;color:var(--btn-txt);
+  background:linear-gradient(90deg,#20E8C6,#22B8F0);box-shadow:0 10px 28px -10px rgba(34,200,230,.75),inset 0 1px 0 rgba(255,255,255,.55);transition:transform .12s,filter .12s}
+.btn:active{transform:scale(.97)}
+.btn svg{width:22px;height:22px}
+.btn[disabled]{filter:grayscale(.7) brightness(.8);opacity:.6;cursor:default}
+.btn.grande{min-height:68px;font-size:28px}
+.btn.hueca{background:var(--vidrio);color:var(--texto);border:1.5px solid var(--borde2);box-shadow:var(--sombra);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.btn.chico{min-height:46px;font-size:14px;font-family:var(--cuerpo);font-weight:800;letter-spacing:0;padding:0 16px;border-radius:16px}
+
+/* ===== 01 · INICIO ===== */
+#p-inicio .cont{justify-content:space-between}
+.inicio-top{display:flex;justify-content:flex-end;gap:8px}
+.logo-zona{text-align:center;margin-top:auto;margin-bottom:auto;padding-top:18vh}
+.logo{display:inline-flex;align-items:center;justify-content:center;font-family:var(--display);font-size:clamp(46px,15vw,74px);line-height:1;color:#fff;
+  letter-spacing:.01em;-webkit-text-stroke:2px #05233A;paint-order:stroke fill;
+  text-shadow:0 3px 0 #0a3c5a,0 6px 0 #062a40,0 10px 24px rgba(0,0,0,.55)}
+.logo .hoja-o{width:.86em;height:.86em;margin:0 .02em;filter:drop-shadow(0 3px 0 #062a40) drop-shadow(0 8px 14px rgba(0,0,0,.5))}
+.logo.mini{font-size:24px;-webkit-text-stroke:1px #05233A;text-shadow:0 2px 0 #062a40,0 4px 10px rgba(0,0,0,.4)}
+.logo.mini span{background:linear-gradient(90deg,#4BF0D2,#33C3F5);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:0}
+.lema{font-family:var(--display);font-size:clamp(20px,6vw,27px);margin-top:12px;color:#5BF5D9;
+  text-shadow:0 2px 0 #05233A,0 0 18px rgba(25,227,208,.55),0 4px 14px rgba(0,0,0,.6)}
+.bajada-inicio{margin-top:8px;font-weight:800;font-size:15px;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.8)}
+.inicio-abajo{display:flex;flex-direction:column;gap:14px;margin-top:22px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:82px;border-radius:18px;
+  background:var(--vidrio);border:1px solid var(--borde);font-weight:800;font-size:13.5px;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:var(--sombra)}
+.tile svg{width:30px;height:30px;color:var(--turq)}
+.saludo{text-align:center;font-weight:800;font-size:14px;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.8)}
+.saludo img{width:26px;height:26px;border-radius:50%;vertical-align:middle;margin-right:6px;border:2px solid var(--turq)}
+
+/* ===== 02 · REGISTRO ===== */
+.titulo-grande{font-family:var(--display);font-weight:400;font-size:clamp(32px,10vw,42px);line-height:1.05;margin-top:16px;text-shadow:0 3px 14px rgba(0,0,0,.45)}
+.titulo-grande em{font-style:normal;color:var(--turq);display:block}
+.bajada{margin-top:10px;color:var(--texto);font-size:15.5px;line-height:1.4;font-weight:600;text-shadow:0 1px 10px rgba(0,0,0,.55)}
+[data-tema="claro"] .titulo-grande,[data-tema="claro"] .bajada,[data-tema="claro"] .top h1,[data-tema="claro"] .top h2{text-shadow:0 1px 12px rgba(255,255,255,.9)}
+.form{display:flex;flex-direction:column;gap:12px;margin-top:20px}
+.campo{display:flex;align-items:center;gap:12px;min-height:64px;padding:8px 16px;border-radius:18px}
+.campo svg{width:24px;height:24px;flex:none;color:var(--suave)}
+.campo label{display:block;font-size:12.5px;color:var(--suave);font-weight:700}
+.campo input{width:100%;background:none;border:0;outline:0;font-size:19px;font-weight:800;padding:2px 0}
+.campo input::placeholder{color:var(--tenue);font-weight:600}
+.campo:focus-within{border-color:var(--turq);box-shadow:0 0 0 3px rgba(25,227,208,.18),var(--sombra)}
+.etq{font-weight:800;font-size:15px;margin:8px 0 -2px;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+[data-tema="claro"] .etq{text-shadow:0 1px 10px rgba(255,255,255,.9)}
+.cursos{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.curso{position:relative;min-height:84px;border-radius:18px;font-family:var(--display);font-size:28px;display:grid;place-items:center}
+.curso::after{content:"";position:absolute;top:10px;right:10px;width:20px;height:20px;border-radius:50%;border:2px solid var(--tenue)}
+.curso[aria-pressed="true"]{border:2px solid var(--verde);box-shadow:0 0 0 4px rgba(63,217,124,.18),0 0 26px -6px rgba(63,217,124,.8);background:linear-gradient(160deg,rgba(63,217,124,.30),rgba(9,40,46,.7))}
+[data-tema="claro"] .curso[aria-pressed="true"]{background:linear-gradient(160deg,rgba(63,217,124,.35),rgba(255,255,255,.9))}
+.curso[aria-pressed="true"]::after{border:0;background:var(--verde) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M6 12.5l4 4 8-9' fill='none' stroke='%2305233A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat}
+.avs{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 6px;scrollbar-width:none}
+.avs::-webkit-scrollbar{display:none}
+.av{flex:none;width:58px;height:58px;border-radius:50%;padding:3px;border:2.5px solid transparent;background:var(--vidrio)}
+.av img{width:100%;height:100%;border-radius:50%;display:block}
+.av[aria-pressed="true"]{border-color:var(--turq);box-shadow:0 0 16px -2px var(--turq)}
+.modos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.modo{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 6px;border-radius:18px;min-height:96px;text-align:center}
+.modo svg{width:34px;height:34px;color:var(--turq)}
+.modo b{font-size:14.5px;font-weight:900;line-height:1.1}
+.modo small{font-size:11.5px;color:var(--suave);font-weight:700;line-height:1.15}
+.modo[aria-pressed="true"]{border:2px solid var(--turq);box-shadow:0 0 0 4px rgba(25,227,208,.16),0 0 24px -6px var(--turq)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:10px 14px;border-radius:999px;font-weight:800;font-size:13.5px;background:var(--vidrio);border:1px solid var(--borde);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.chip[aria-pressed="true"]{background:var(--turq);color:var(--btn-txt);border-color:var(--turq)}
+.chip[disabled]{opacity:.45}
+.nota{font-size:13px;color:var(--suave);font-weight:700;line-height:1.35;text-shadow:0 1px 8px rgba(0,0,0,.4)}
+[data-tema="claro"] .nota{text-shadow:none}
+.sala-campo input{text-transform:uppercase;letter-spacing:.35em;font-family:var(--display);font-size:22px}
+.salas{display:flex;flex-direction:column;gap:8px}
+.sala-item{display:grid;grid-template-columns:38px 1fr auto;gap:10px;align-items:center;padding:8px 12px;border-radius:16px;text-align:left}
+.sala-item img{width:38px;height:38px;border-radius:50%}
+.sala-item small{display:block;color:var(--suave);font-weight:700;font-size:12px}
+.sala-item b.cod{font-family:var(--display);color:var(--turq);letter-spacing:.14em;font-size:18px}
+.aviso{min-height:20px;color:var(--ambar);font-weight:800;font-size:14px;text-align:center;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.registro-pie{margin-top:auto;padding-top:14px}
+
+/* ===== 03 · ROSCO ===== */
+#p-rosco .cont{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 12px);gap:8px;height:100%}
+.reloj{display:flex;align-items:center;gap:7px;height:42px;padding:0 14px;border-radius:999px;font-family:var(--display);font-size:18px;flex:none}
+.reloj svg{width:20px;height:20px}
+.reloj.urgente{color:var(--rojo);border-color:var(--rojo);animation:late 1s infinite}
+@keyframes late{50%{box-shadow:0 0 0 4px rgba(255,77,94,.25)}}
+.progreso{display:flex;align-items:center;gap:10px;font-weight:900;font-size:15px}
+.riel{flex:1;height:7px;border-radius:9px;background:rgba(160,210,230,.22);overflow:hidden;display:flex}
+.riel i{display:block;height:100%;transition:width .4s}
+.riel .r-ok{background:var(--verde)}.riel .r-er{background:var(--rojo)}.riel .r-ps{background:var(--azul)}
+.herr{display:flex;gap:6px}
+.herr .ico-btn{width:36px;height:36px;border-radius:12px}
+.herr .ico-btn svg{width:19px;height:19px}
+.jugadores{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.jug{display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:8px;padding:6px 10px;border-radius:16px;border-width:1.5px;transition:box-shadow .25s,border-color .25s}
+.jug img{width:36px;height:36px;border-radius:50%}
+.jug b{display:block;font-size:13.5px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jug small{display:block;font-size:12px;color:var(--suave);font-weight:800}
+.jug .t{font-family:var(--display);font-size:15px}
+.jug.activo{border-color:var(--c);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 22%,transparent),0 0 20px -6px var(--c)}
+.jug .t.urgente{color:var(--rojo)}
+.zona-rosco{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.rosco{position:relative;width:var(--rw,340px);height:var(--rw,340px)}
+.rosco::before{content:"";position:absolute;inset:6%;border-radius:50%;
+  background:radial-gradient(circle,rgba(25,227,208,.12) 0%,rgba(6,26,43,.55) 55%,rgba(6,26,43,0) 72%)}
+[data-tema="claro"] .rosco::before{background:radial-gradient(circle,rgba(255,255,255,.88) 0%,rgba(255,255,255,.7) 55%,rgba(255,255,255,0) 72%)}
+.letra{position:absolute;width:10.4%;height:10.4%;transform:translate(-50%,-50%);border-radius:50%;display:grid;place-items:center;
+  font-family:var(--display);font-size:calc(var(--rw,340px)*.05);color:var(--texto);background:var(--letra);border:1.5px solid var(--letra-b);
+  box-shadow:0 4px 10px -4px rgba(0,0,0,.6);transition:background .25s,border-color .25s,transform .25s,box-shadow .25s}
+.letra .bd{position:absolute;right:-14%;top:-14%;width:46%;height:46%;border-radius:50%;display:none;place-items:center;border:1.5px solid rgba(255,255,255,.85)}
+.letra .bd svg{width:70%;height:70%}
+.letra.acierto{background:linear-gradient(160deg,#4BE38E,#139E55);border-color:#8DF5B8;color:#fff;box-shadow:0 0 16px -3px rgba(63,217,124,.9)}
+.letra.acierto .bd{display:grid;background:var(--verde)}
+.letra.error{background:linear-gradient(160deg,#FF6B78,#D21F38);border-color:#FFB0B8;color:#fff;box-shadow:0 0 16px -3px rgba(255,77,94,.9)}
+.letra.error .bd{display:grid;background:var(--rojo)}
+.letra.pasada{background:linear-gradient(160deg,#5AA8FF,#2D63C8);border-color:#B5D6FF;color:#fff}
+.letra.pasada .bd{display:grid;background:var(--azul)}
+.letra.activa{transform:translate(-50%,-50%) scale(1.28);z-index:2;border:2.5px solid #9FFBF0;background:linear-gradient(160deg,#2AF0DA,#0A9DB5);color:#fff;
+  box-shadow:0 0 0 4px rgba(25,227,208,.25),0 0 26px 2px rgba(25,227,208,.75)}
+.centro{position:absolute;left:50%;top:50%;width:66%;height:62%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;overflow:hidden}
+.consigna{font-weight:900;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--turq);flex:none}
+.definicion{font-weight:800;line-height:1.28;color:var(--texto);text-shadow:0 1px 8px rgba(0,0,0,.45)}
+[data-tema="claro"] .definicion{text-shadow:none}
+.definicion b{color:var(--ambar);font-weight:900}
+.res-card{display:flex;flex-direction:column;align-items:center;gap:6px;animation:pop .3s ease}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+.res-card .res-ico{width:54px;height:54px;border-radius:50%;display:grid;place-items:center}
+.res-card .res-ico svg{width:30px;height:30px}
+.res-card b{font-family:var(--display);font-size:calc(var(--rw,340px)*.058);line-height:1.1;word-break:break-word}
+.res-card span{font-weight:800;font-size:13.5px;color:var(--suave)}
+.res-card .clave{color:var(--ambar)}
+.turno-card img{width:74px;height:74px;border-radius:50%;border:3px solid var(--c)}
+.cuenta{font-family:var(--display);font-size:calc(var(--rw,340px)*.3);color:var(--turq);text-shadow:0 0 30px rgba(25,227,208,.7);animation:pop .5s ease}
+.feedback{min-height:22px;text-align:center;font-weight:800;font-size:14px;color:var(--suave);text-shadow:0 1px 8px rgba(0,0,0,.6)}
+[data-tema="claro"] .feedback{text-shadow:none}
+.feedback.casi{color:var(--ambar)}
+.pensando i{display:inline-block;width:6px;height:6px;margin-left:3px;border-radius:50%;background:currentColor;animation:pz 1s infinite}
+.pensando i:nth-child(2){animation-delay:.15s}.pensando i:nth-child(3){animation-delay:.3s}
+@keyframes pz{50%{transform:translateY(-4px);opacity:.4}}
+.barra-letra{height:6px;border-radius:9px;background:rgba(160,210,230,.18);overflow:hidden;visibility:hidden}
+.barra-letra.on{visibility:visible}
+.barra-letra i{display:block;height:100%;width:100%;background:var(--turq);border-radius:9px}
+.entrada{display:flex;align-items:center;gap:10px;min-height:56px;padding:0 16px;border-radius:18px}
+.entrada svg{width:24px;height:24px;color:var(--suave);flex:none}
+.entrada input{flex:1;min-width:0;background:none;border:0;outline:0;font-size:18px;font-weight:800}
+.entrada input::placeholder{color:var(--tenue);font-weight:600}
+.entrada:focus-within{border-color:var(--turq)}
+.acciones{display:grid;grid-template-columns:1fr 1.3fr;gap:12px}
+.acciones .btn{flex-direction:column;gap:2px;min-height:72px;border-radius:20px;font-size:15px}
+.acciones .btn svg{width:26px;height:26px}
+.acciones .hueca{color:var(--texto)}
+
+/* ===== 04 · RESULTADO ===== */
+.anillo{position:relative;width:min(64vw,250px);aspect-ratio:1;margin:8px auto 0}
+.anillo svg{width:100%;height:100%;transform:rotate(-90deg)}
+.anillo .num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.anillo .num b{font-family:var(--display);font-size:clamp(56px,18vw,78px);line-height:1}
+.anillo .num span{font-weight:900;font-size:18px;line-height:1.15}
+.anillo .num small{font-weight:800;font-size:14px;color:var(--suave)}
+.anillo .arco{transition:stroke-dashoffset 1.4s cubic-bezier(.2,.8,.2,1)}
+.motivo{text-align:center;font-weight:800;font-size:14px;color:var(--suave);margin-top:6px;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+[data-tema="claro"] .motivo{text-shadow:none}
+.tres{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.tres>div{display:flex;flex-direction:column;align-items:center;gap:3px;padding:12px 4px;border-radius:18px}
+.tres .ic{width:30px;height:30px;border-radius:50%;display:grid;place-items:center}
+.tres .ic svg{width:18px;height:18px}
+.tres b{font-family:var(--display);font-size:26px;line-height:1.1}
+.tres small{font-weight:800;font-size:12.5px;color:var(--suave)}
+.fila-pts{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:20px;margin-top:12px}
+.fila-pts svg{width:42px;height:42px;flex:none;color:var(--verde)}
+.fila-pts small{display:block;font-weight:800;font-size:13.5px;color:var(--suave)}
+.fila-pts b{font-family:var(--display);font-size:30px;line-height:1.1}
+.fila-pts.mejor b{font-size:19px}
+.fila-pts.mejor svg{width:34px;height:34px}
+.fila-pts .nuevo{margin-left:auto;font-size:11.5px;font-weight:900;color:var(--btn-txt);background:var(--ambar);padding:4px 9px;border-radius:999px}
+.botones2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.versus{display:flex;align-items:flex-end;justify-content:center;gap:12px;padding:14px 10px 12px;border-radius:20px;margin-top:12px}
+.vs-col{flex:1;max-width:190px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.vs-col img{width:64px;height:64px;border-radius:50%;border:3px solid var(--c)}
+.vs-col.gana img{width:78px;height:78px;box-shadow:0 0 22px -4px var(--oro);border-color:var(--oro)}
+.vs-col b{font-weight:900;font-size:15px}
+.vs-col .pts{font-family:var(--display);font-size:22px}
+.vs-col small{color:var(--suave);font-weight:800;font-size:12px}
+.vs-col .corona{width:34px;height:24px;color:var(--oro)}
+.veredicto{text-align:center;font-weight:900;font-size:15.5px;margin-top:8px}
+.repaso{margin-top:12px;border-radius:20px;padding:6px 14px}
+.repaso summary{list-style:none;display:flex;align-items:center;justify-content:space-between;padding:10px 0;font-weight:900;font-size:15px;cursor:pointer}
+.repaso summary::-webkit-details-marker{display:none}
+.repaso summary svg{width:20px;height:20px;transition:transform .2s}
+.repaso[open] summary svg{transform:rotate(180deg)}
+.rep-it{display:grid;grid-template-columns:34px 1fr;gap:10px;padding:10px 0;border-top:1px solid var(--borde)}
+.rep-it .l{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);color:#fff}
+.rep-it .l.error{background:var(--rojo)}.rep-it .l.pasada,.rep-it .l.pendiente{background:var(--azul)}
+.rep-it b{font-weight:900;font-size:15px}
+.rep-it p{font-size:13.5px;color:var(--suave);font-weight:600;line-height:1.35;margin-top:2px}
+.extra{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+
+/* ===== 05 · CLASIFICACIÓN ===== */
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);padding:4px;border-radius:999px;margin-top:10px}
+.tab{min-height:42px;border-radius:999px;font-weight:900;font-size:15px}
+.tab[aria-selected="true"]{background:linear-gradient(90deg,#20E8C6,#22B8F0);color:var(--btn-txt)}
+.podio{display:grid;grid-template-columns:1fr 1.12fr 1fr;align-items:end;gap:8px;margin-top:24px}
+.pd{display:flex;flex-direction:column;align-items:center;text-align:center}
+.pd .cara{position:relative;margin-bottom:-14px;z-index:1}
+.pd .cara img{width:64px;height:64px;border-radius:50%;border:3px solid var(--c);background:#0c2a40;box-shadow:0 6px 16px -6px rgba(0,0,0,.6)}
+.pd.p1 .cara img{width:84px;height:84px}
+.pd .corona{position:absolute;left:50%;top:-24px;transform:translateX(-50%);width:34px;height:26px;color:var(--oro);filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
+.pd .peldano{width:100%;border-radius:14px 14px 6px 6px;padding:22px 4px 12px;color:#fff;display:flex;flex-direction:column;align-items:center;gap:2px}
+.pd .peldano .pos{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-family:var(--display);font-size:17px;background:rgba(255,255,255,.22);margin-bottom:4px}
+.pd .peldano b{font-weight:900;font-size:14px;line-height:1.15}
+.pd .peldano small{font-weight:800;font-size:13px;opacity:.95}
+.pd.p1 .peldano{min-height:128px;background:linear-gradient(180deg,#F7D774,#C99A22);color:#3B2A00}
+.pd.p2 .peldano{min-height:100px;background:linear-gradient(180deg,#8FA6BE,#56708C)}
+.pd.p3 .peldano{min-height:86px;background:linear-gradient(180deg,#E29A6E,#A85A34)}
+.pd.p1{--c:var(--oro)}.pd.p2{--c:#BFD0E0}.pd.p3{--c:#E8A27A}
+.lista{margin-top:14px;border-radius:20px;padding:4px 14px}
+.fr{display:grid;grid-template-columns:26px 38px 1fr auto;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--borde)}
+.fr:first-child{border-top:0}
+.fr .n{font-family:var(--display);font-size:16px;color:var(--suave);text-align:center}
+.fr img{width:38px;height:38px;border-radius:50%}
+.fr b{font-weight:900;font-size:15px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fr small{display:block;font-size:12px;color:var(--suave);font-weight:700}
+.fr .p{font-weight:900;font-size:15px;white-space:nowrap}
+.fr.mio{background:linear-gradient(90deg,rgba(25,227,208,.16),transparent);margin:0 -14px;padding-left:14px;padding-right:14px}
+.vacio{padding:20px 4px;text-align:center;color:var(--suave);font-weight:700;font-size:14.5px;line-height:1.4}
+.fuente{margin-top:10px;text-align:center;font-size:12.5px;color:var(--suave);font-weight:700;text-shadow:0 1px 8px rgba(0,0,0,.5)}
+[data-tema="claro"] .fuente{text-shadow:none}
+
+/* ===== SALA EN LÍNEA ===== */
+.sala-cod{font-family:var(--display);font-size:clamp(56px,20vw,84px);letter-spacing:.16em;padding-left:.16em;text-align:center;color:var(--turq);line-height:1;margin-top:14px;text-shadow:0 0 26px rgba(25,227,208,.5),0 3px 0 #05233A}
+.sala-txt{text-align:center;margin-top:10px}
+.duo{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px;margin-top:18px}
+.sj{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 8px;border-radius:20px;border-top:5px solid var(--c);text-align:center;min-height:170px;justify-content:center}
+.sj img,.sj .vacio-av{width:76px;height:76px;border-radius:50%;border:3px solid var(--c)}
+.sj .vacio-av{border-style:dashed;display:grid;place-items:center;color:var(--c)}
+.sj b{font-weight:900;font-size:15px}
+.sj small{font-size:12.5px;color:var(--suave);font-weight:700}
+.vs{font-family:var(--display);font-size:28px;color:var(--j2);text-shadow:0 2px 0 #05233A}
+
+/* chat */
+.chat{border-radius:20px;padding:12px;margin-top:12px}
+.chat h3{font-size:14px;font-weight:900;margin-bottom:8px}
+.chat-lista{max-height:150px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.msg{align-self:flex-start;max-width:85%;padding:7px 11px;border-radius:14px 14px 14px 4px;background:var(--vidrio2);border:1px solid var(--borde);font-size:14px;font-weight:700}
+.msg b{display:block;font-size:11.5px;color:var(--c)}
+.msg.mio{align-self:flex-end;border-radius:14px 14px 4px 14px;background:rgba(25,227,208,.18)}
+.chat-vacio,.chat-aviso{font-size:13px;color:var(--suave);font-weight:700}
+.chat-form{display:flex;gap:8px;margin-top:8px}
+.chat-form input{flex:1;min-width:0;min-height:42px;border-radius:12px;border:1px solid var(--borde);background:var(--vidrio2);padding:0 12px;outline:0;font-weight:700}
+.chat-form .btn{min-height:42px;padding:0 14px;font-size:14px}
+.chat .chips .chip{padding:7px 11px;font-size:12.5px}
+
+/* banda de conexión */
+.banda{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 8px);transform:translate(-50%,-140%);z-index:50;max-width:min(94vw,500px);
+  display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:16px;background:#3a1020;border:1px solid var(--rojo);color:#fff;font-weight:800;font-size:13.5px;transition:transform .3s}
+.banda.on{transform:translate(-50%,0)}
+.banda button{background:var(--rojo);color:#fff;padding:6px 10px;border-radius:10px;font-weight:900;font-size:12.5px}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;justify-content:center;background:rgba(2,10,18,.55);padding:16px}
+.modal.on{display:flex;animation:entra .2s ease}
+.modal .caja{width:100%;max-width:480px;border-radius:24px;padding:22px 20px calc(env(safe-area-inset-bottom,0px) + 18px);background:var(--vidrio2);border:1px solid var(--borde2);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);max-height:86vh;overflow-y:auto}
+.modal h3{font-family:var(--display);font-weight:400;font-size:22px;margin-bottom:8px}
+.modal p{font-weight:600;font-size:15px;line-height:1.45;color:var(--suave)}
+.modal .btns{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+
+/* acerca / perfil */
+.texto{border-radius:20px;padding:16px 18px;margin-top:14px}
+.texto h3{font-weight:900;font-size:16px;margin:12px 0 4px;color:var(--turq)}
+.texto h3:first-child{margin-top:0}
+.texto p,.texto li{font-weight:600;font-size:14.5px;line-height:1.45;color:var(--texto)}
+.texto ul{padding-left:18px}
+.perfil-cab{display:flex;align-items:center;gap:14px;padding:16px;border-radius:20px;margin-top:14px}
+.perfil-cab img{width:72px;height:72px;border-radius:50%;border:3px solid var(--turq)}
+.perfil-cab b{font-family:var(--display);font-size:22px;display:block}
+.perfil-cab small{font-weight:800;color:var(--suave);font-size:14px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.stats>div{padding:14px;border-radius:18px}
+.stats b{font-family:var(--display);font-size:26px;display:block}
+.stats small{font-weight:800;color:var(--suave);font-size:13px}
+
+/* confeti */
+.confeti{position:fixed;top:-30px;z-index:70;pointer-events:none;animation:cae var(--t,3s) linear forwards}
+.confeti.letra-cae{font-family:var(--display)}
+@keyframes cae{to{transform:translateY(110vh) rotate(var(--rot,360deg))}}
+
+@media (max-height:700px){
+  .letra{font-size:calc(var(--rw,300px)*.052)}
+  .acciones .btn{min-height:60px}
+  .entrada{min-height:50px}
+  .logo-zona{padding-top:10vh}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<script>try{document.documentElement.dataset.tema=localStorage.getItem("bior-tema")||"oscuro"}catch(e){}</script>
+
+<!-- ===== 01 · INICIO ===== -->
+<section class="pantalla activa" id="p-inicio" aria-label="Inicio">
+  <div class="cont">
+    <div class="inicio-top">
+      <button class="ico-btn" id="btn-tema-i" aria-label="Cambiar a modo claro"></button>
+      <button class="ico-btn" id="btn-son-i" aria-label="Silenciar"></button>
+    </div>
+    <div class="logo-zona">
+      <h1 class="logo" aria-label="BIOROSCO"><span>BI</span><svg class="hoja-o" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="gO" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7CF29A"/><stop offset="1" stop-color="#11B86A"/></linearGradient><linearGradient id="gH" x1="0" y1="1" x2="1" y2="0"><stop offset="0" stop-color="#0E8F52"/><stop offset="1" stop-color="#A6F7B4"/></linearGradient></defs><circle cx="50" cy="50" r="41" fill="none" stroke="#05233A" stroke-width="20"/><circle cx="50" cy="50" r="41" fill="none" stroke="url(#gO)" stroke-width="13"/><path d="M33 72C27 50 38 30 68 26c3 26-10 44-35 46z" fill="url(#gH)" stroke="#05233A" stroke-width="3.5" stroke-linejoin="round"/><path d="M35 69C44 56 52 45 62 33" fill="none" stroke="#05233A" stroke-width="3" stroke-linecap="round"/></svg><span>ROSCO</span></h1>
+      <p class="lema">El desafío de la vida</p>
+      <p class="bajada-inicio">Biología de Salta para mentes curiosas</p>
+    </div>
+    <div class="inicio-abajo">
+      <p class="saludo" id="saludo"></p>
+      <button class="btn grande" id="btn-jugar"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>JUGAR</button>
+      <div class="tiles">
+        <button class="tile" id="btn-perfil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.4-6.5 8-6.5s7 2 8 6.5"/></svg>Mi perfil</button>
+        <button class="tile" id="btn-clasif"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="4.5" height="9" rx="1.2"/><rect x="9.75" y="5" width="4.5" height="16" rx="1.2"/><rect x="16.5" y="9" width="4.5" height="12" rx="1.2"/></svg>Clasificación</button>
+        <button class="tile" id="btn-acerca"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13C12 8 9 5 4 5c0 5 3 8 8 8z"/><path d="M12 15c0-4.5 3-7.5 8-7.5 0 4.5-3 7.5-8 7.5z"/></svg>Acerca de</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 02 · REGISTRO ===== -->
+<section class="pantalla" id="p-registro" aria-label="Registro">
+  <div class="cont">
+    <div class="top"><button class="ico-btn sin" data-volver="p-inicio" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><span style="flex:1"></span></div>
+    <h2 class="titulo-grande">Tu identidad<em>de juego</em></h2>
+    <p class="bajada">Completá tus datos para comenzar a desafiar tus conocimientos de biología.</p>
+    <div class="form">
+      <div class="campo vidrio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.4-6.5 8-6.5s7 2 8 6.5"/></svg>
+        <div style="flex:1"><label for="in-nombre">Nombre</label><input id="in-nombre" maxlength="24" autocomplete="given-name" placeholder="Tu nombre"></div></div>
+      <div class="campo vidrio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.4-6.5 8-6.5s7 2 8 6.5"/></svg>
+        <div style="flex:1"><label for="in-apellido">Apellido</label><input id="in-apellido" maxlength="24" autocomplete="family-name" placeholder="Tu apellido"></div></div>
+      <p class="etq">Curso</p>
+      <div class="cursos" id="cursos">
+        <button class="curso vidrio" data-sec="1° A" aria-pressed="true">1° A</button>
+        <button class="curso vidrio" data-sec="1° B" aria-pressed="false">1° B</button>
+      </div>
+      <p class="etq">Tu personaje</p>
+      <div class="avs" id="avs"></div>
+      <p class="etq">¿Cómo jugás?</p>
+      <div class="modos" id="modos">
+        <button class="modo vidrio" data-modo="sola" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5"/></svg><b>Solo</b><small>contra el reloj</small></button>
+        <button class="modo vidrio" data-modo="boti" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="4"/><path d="M12 8V4.5"/><circle cx="12" cy="3.5" r="1.2" fill="currentColor"/><circle cx="9" cy="14" r="1.5" fill="currentColor"/><circle cx="15" cy="14" r="1.5" fill="currentColor"/><path d="M2 13v3M22 13v3"/></svg><b>Contra Boti</b><small>el robot rival</small></button>
+        <button class="modo vidrio" data-modo="linea" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2.5" y="5" width="7.5" height="13" rx="2"/><rect x="14" y="5" width="7.5" height="13" rx="2"/><path d="M10.5 9.5h3M10.5 13.5h3"/></svg><b>Multijugador</b><small>en línea, cada uno en su celu</small></button>
+      </div>
+      <div id="opc-linea" class="oculto" style="display:flex;flex-direction:column;gap:10px">
+        <div class="campo vidrio sala-campo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="2.5"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+          <div style="flex:1"><label for="in-sala">Código de sala</label><input id="in-sala" maxlength="4" autocomplete="off" spellcheck="false" placeholder="····"></div></div>
+        <p class="nota">Dejalo vacío para crear una sala nueva. Si tu rival ya la creó, escribí su código o tocala en la lista.</p>
+        <div class="salas" id="salas"></div>
+      </div>
+      <p class="etq" id="etq-reloj">Reloj</p>
+      <div class="chips" id="chips-reloj"></div>
+      <p class="nota" id="nota-reloj"></p>
+    </div>
+    <div class="registro-pie">
+      <p class="aviso" id="aviso"></p>
+      <button class="btn grande" id="btn-empezar" style="font-size:22px"><span id="empezar-t">EMPEZAR</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SALA EN LÍNEA ===== -->
+<section class="pantalla" id="p-sala" aria-label="Sala en línea">
+  <div class="cont">
+    <div class="top"><button class="ico-btn sin" id="btn-sala-atras" aria-label="Salir de la sala"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><h2>Sala en línea</h2><span style="width:42px"></span></div>
+    <div class="sala-cod" id="sala-cod">····</div>
+    <p class="bajada sala-txt" id="sala-txt"></p>
+    <div class="duo">
+      <div class="sj vidrio" id="sala-j0" style="--c:var(--j1)"></div>
+      <div class="vs">VS</div>
+      <div class="sj vidrio" id="sala-j1" style="--c:var(--j2)"></div>
+    </div>
+    <p class="nota" id="sala-modo" style="text-align:center;margin-top:10px"></p>
+    <div id="slot-sala"></div>
+    <div class="registro-pie" style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn" id="btn-sala-empezar" disabled>Sortear rosco y empezar</button>
+      <button class="btn hueca" id="btn-sala-salir">Salir de la sala</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 03 · ROSCO ===== -->
+<section class="pantalla" id="p-rosco" aria-label="Rosco">
+  <div class="cont">
+    <div class="top">
+      <button class="ico-btn sin" id="btn-cortar" aria-label="Terminar la partida"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div style="flex:1;display:flex;justify-content:center"><span class="logo mini"><span>BIOROSCO</span></span></div>
+      <div class="reloj vidrio" id="reloj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5"/></svg><span id="reloj-t">00:00</span></div>
+    </div>
+    <div class="progreso">
+      <div class="riel"><i class="r-ok" id="r-ok"></i><i class="r-er" id="r-er"></i><i class="r-ps" id="r-ps"></i></div>
+      <span id="prog">0 / 24</span>
+      <div class="herr">
+        <button class="ico-btn" id="btn-voz" aria-label="Lectura en voz alta"></button>
+        <button class="ico-btn" id="btn-son" aria-label="Sonido"></button>
+        <button class="ico-btn" id="btn-tema" aria-label="Modo claro u oscuro"></button>
+      </div>
+    </div>
+    <div class="jugadores oculto" id="jugadores">
+      <div class="jug vidrio" id="jug0" style="--c:var(--j1)"><img alt=""><div><b></b><small></small></div><span class="t"></span></div>
+      <div class="jug vidrio" id="jug1" style="--c:var(--j2)"><img alt=""><div><b></b><small></small></div><span class="t"></span></div>
+    </div>
+    <div class="zona-rosco" id="zona-rosco">
+      <div class="rosco" id="rosco" role="list" aria-label="Rosco de letras">
+        <div class="centro" id="centro" aria-live="polite"></div>
+      </div>
+    </div>
+    <p class="feedback" id="feedback" aria-live="polite"></p>
+    <div class="barra-letra" id="barra-letra"><i id="barra-letra-i"></i></div>
+    <label class="entrada vidrio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="13" rx="3"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M18 14h.01M9 14h6"/></svg>
+      <input id="entrada" placeholder="Escribí tu respuesta" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="send" aria-label="Tu respuesta" disabled></label>
+    <div class="acciones">
+      <button class="btn hueca" id="btn-pasar" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 3.5v5h5"/></svg>PASAPALABRA</button>
+      <button class="btn" id="btn-responder" disabled><svg viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>RESPONDER</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== 04 · RESULTADO ===== -->
+<section class="pantalla" id="p-resultado" aria-label="Resultado">
+  <div class="cont">
+    <div class="top"><button class="ico-btn sin" id="btn-res-inicio" aria-label="Volver al inicio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><h2>Tu resultado</h2><span style="width:42px"></span></div>
+    <div class="anillo">
+      <svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="rgba(150,210,230,.18)" stroke-width="9"/>
+        <circle class="arco" id="arco" cx="60" cy="60" r="52" fill="none" stroke="url(#gAr)" stroke-width="9" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+        <defs><linearGradient id="gAr" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1EF0B4"/><stop offset="1" stop-color="#19C4E3"/></linearGradient></defs></svg>
+      <div class="num"><b id="f-ok">0</b><span>respuestas<br>correctas</span><small id="f-de">de 24</small></div>
+    </div>
+    <p class="motivo" id="motivo"></p>
+    <div class="versus vidrio oculto" id="versus"></div>
+    <p class="veredicto oculto" id="veredicto"></p>
+    <div class="tres">
+      <div class="vidrio"><span class="ic" style="background:var(--verde)" id="ic-ok"></span><b id="f-c">0</b><small>Correctas</small></div>
+      <div class="vidrio"><span class="ic" style="background:var(--rojo)" id="ic-er"></span><b id="f-i">0</b><small>Incorrectas</small></div>
+      <div class="vidrio"><span class="ic" style="background:var(--azul)" id="ic-ps"></span><b id="f-p">0</b><small>Pendientes</small></div>
+    </div>
+    <div class="fila-pts vidrio"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M24 43V20"/><path d="M24 30C24 18 17 10 7 9c0 12 7 20 17 21z" fill="rgba(63,217,124,.25)"/><path d="M24 25c0-10 6-17 17-18 0 11-6 17-17 18z" fill="rgba(63,217,124,.25)"/></svg>
+      <div><small id="pts-rot">Tu puntaje</small><b id="f-pts">0 pts</b></div></div>
+    <div class="fila-pts vidrio mejor"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="4.5" height="9" rx="1.2"/><rect x="9.75" y="5" width="4.5" height="16" rx="1.2"/><rect x="16.5" y="9" width="4.5" height="12" rx="1.2"/></svg>
+      <div><small>Mejor puntaje personal</small><b id="f-mejor">0 pts</b></div><span class="nuevo oculto" id="f-nuevo">¡NUEVO RÉCORD!</span></div>
+    <div class="botones2">
+      <button class="btn hueca chico" id="btn-ver-clasif"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="12" width="4.5" height="9" rx="1.2"/><rect x="9.75" y="5" width="4.5" height="16" rx="1.2"/><rect x="16.5" y="9" width="4.5" height="12" rx="1.2"/></svg>Ver clasificación</button>
+      <button class="btn hueca chico" id="btn-otra"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 3.5v5h5"/></svg><span id="btn-otra-t">Jugar de nuevo</span></button>
+    </div>
+    <div class="extra">
+      <button class="btn" id="btn-practicar" style="font-size:16px;min-height:52px"></button>
+    </div>
+    <details class="repaso vidrio" id="repaso"><summary><span id="repaso-t">Para repasar</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></summary><div id="repaso-lista"></div></details>
+    <div id="slot-final"></div>
+  </div>
+</section>
+
+<!-- ===== 05 · CLASIFICACIÓN ===== -->
+<section class="pantalla" id="p-ranking" aria-label="Clasificación">
+  <div class="cont">
+    <div class="top"><button class="ico-btn sin" id="btn-rank-atras" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><h2>Clasificación</h2><button class="ico-btn sin" id="btn-rank-recargar" aria-label="Actualizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 3.5v5h-5"/></svg></button></div>
+    <div class="tabs vidrio" role="tablist" id="tabs">
+      <button class="tab" role="tab" data-t="" aria-selected="true">General</button>
+      <button class="tab" role="tab" data-t="1° A" aria-selected="false">1° A</button>
+      <button class="tab" role="tab" data-t="1° B" aria-selected="false">1° B</button>
+    </div>
+    <div id="rank-cuerpo"></div>
+    <p class="fuente" id="rank-fuente"></p>
+  </div>
+</section>
+
+<!-- ===== MI PERFIL ===== -->
+<section class="pantalla" id="p-perfil" aria-label="Mi perfil">
+  <div class="cont">
+    <div class="top"><button class="ico-btn sin" data-volver="p-inicio" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><h2>Mi perfil</h2><span style="width:42px"></span></div>
+    <div id="perfil-cuerpo"></div>
+    <div class="registro-pie" style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn" id="btn-editar">Editar mis datos</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ACERCA DE ===== -->
+<section class="pantalla" id="p-acerca" aria-label="Acerca de">
+  <div class="cont">
+    <div class="top"><button class="ico-btn sin" data-volver="p-inicio" aria-label="Volver"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button><h2>Acerca de</h2><span style="width:42px"></span></div>
+    <div class="texto vidrio">
+      <h3>¿Qué es BIOROSCO?</h3>
+      <p>Un rosco de biología con conceptos de 1° año: la célula y sus organelas, las biomoléculas, el metabolismo, los niveles de organización y los ambientes de Salta, desde las Yungas hasta la Puna.</p>
+      <h3>Cómo se juega</h3>
+      <ul>
+        <li>Cada letra trae una definición: la palabra <b>empieza</b> o <b>contiene</b> esa letra.</li>
+        <li>Escribí la respuesta con sus tildes y tocá <b>Responder</b>. Si le falta una tilde, te avisamos y no perdés la letra.</li>
+        <li>Si no la sabés, tocá <b>Pasapalabra</b>: vuelve en la próxima vuelta.</li>
+        <li>Cada letra tiene su barra de tiempo, y la partida tiene su reloj.</li>
+        <li>En cada partida el rosco cambia: hay varias palabras posibles por letra.</li>
+      </ul>
+      <h3>Modos</h3>
+      <ul>
+        <li><b>Solo:</b> vos contra el reloj.</li>
+        <li><b>Contra Boti:</b> se turnan con el robot. Cuando uno acierta o falla, le toca al otro.</li>
+        <li><b>Multijugador:</b> cada uno desde su celular, con un código de sala. Cada jugador tiene su propio reloj.</li>
+      </ul>
+      <h3>Puntaje</h3>
+      <p>Cada acierto vale 100 puntos, más un bonus de rapidez de hasta 99 puntos. La clasificación suma los puntos de todas tus partidas: cuanto más jugás, más subís.</p>
+      <h3>Para instalarla</h3>
+      <p>En Android (Chrome): menú ⋮ → <b>Agregar a la pantalla principal</b>. En iPhone (Safari): botón Compartir → <b>Agregar a inicio</b>. Se abre como una app.</p>
+    </div>
+  </div>
+</section>
+
+<div class="banda" id="banda" role="status"><span id="banda-txt"></span><button id="banda-btn">Terminar</button></div>
+<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="caja"><h3 id="modal-t"></h3><p id="modal-p"></p><div class="btns" id="modal-b"></div></div></div>
+
+<div class="chat vidrio oculto" id="chat">
+  <h3 id="chat-tit">Chat</h3>
+  <div class="chat-lista" id="chat-lista"></div>
+  <div class="chips" id="chat-rapidas"><button class="chip">¿Otra?</button><button class="chip">¡Dale!</button><button class="chip">¡Buena partida!</button><button class="chip">Esperame un toque</button><button class="chip">Me tengo que ir</button></div>
+  <form class="chat-form" id="chat-form"><input id="chat-in" maxlength="80" placeholder="Escribí un mensaje" autocomplete="off"><button class="btn" type="submit">Enviar</button></form>
+</div>
+
+<script src="palabras.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
