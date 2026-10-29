@@ -19,7 +19,9 @@ mudo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2
 voz:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
 novoz:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11a7 7 0 0 0 10.7 5.9M19 11a6.9 6.9 0 0 0-.4-2.3M12 18v3"/><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M3 3l18 18"/></svg>',
 sol:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3L17 7M7 17l-1.7 1.7"/></svg>',
-luna:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>'};
+luna:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>',
+ampliar:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H4a1 1 0 0 0-1 1v4M16 3h4a1 1 0 0 1 1 1v4M8 21H4a1 1 0 0 1-1-1v-4M16 21h4a1 1 0 0 0 1-1v-4"/></svg>',
+reducir:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h4V4M16 8h4V4M4 16h4v4M16 16h4v4"/></svg>'};
 
 /* ===== AVATARES (fauna del NOA + Boti) ===== */
 const AVATARES=["flamenco","tapir","jaguar","tucan","vicuna","nandu","boti"];
@@ -1194,3 +1196,20 @@ pintarSonido();pintarVoz();pintarModo();
 
 /* PWA: instalar como app para jugar a pantalla completa */
 if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
+
+/* ===== PANTALLA COMPLETA (botón, no requiere instalar) ===== */
+const soportaFull=()=>!!(document.documentElement.requestFullscreen||document.documentElement.webkitRequestFullscreen);
+const enFull=()=>!!(document.fullscreenElement||document.webkitFullscreenElement);
+function pintarFull(){["btn-full","btn-full-i"].forEach(id=>{const b=$(id);if(!b)return;
+  if(!soportaFull()){b.style.display="none";return;}
+  b.innerHTML=enFull()?ICO.reducir:ICO.ampliar;
+  b.title=b.setAttribute("aria-label",enFull()?"Salir de pantalla completa":"Pantalla completa");});}
+function toggleFull(){
+  const el=document.documentElement;
+  if(enFull()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);}
+  else{(el.requestFullscreen||el.webkitRequestFullscreen).call(el,{navigationUI:"hide"});}
+}
+["btn-full","btn-full-i"].forEach(id=>{const b=$(id);if(b)b.addEventListener("click",toggleFull);});
+document.addEventListener("fullscreenchange",pintarFull);
+document.addEventListener("webkitfullscreenchange",pintarFull);
+pintarFull();
