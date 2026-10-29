@@ -545,18 +545,14 @@ function arrancarLetra(){
   clearTimeout(letraT);letraT=setTimeout(porTiempo,t*1000);
 }
 function porTiempo(){
+  /* si la barra llega a cero la letra se pierde: NUNCA es pasapalabra automática;
+     el único modo de pasar es el botón Pasapalabra */
   if(!jugando||bloqueado||esBot()||!miTurno())return;
-  const it=items[idx],ultima=estado.filter(s=>s!=="acierto"&&s!=="error").length<=1;
+  const it=items[idx];
   rachas[turno]=0;
-  if(estado[idx]==="pasada"||ultima){
-    estado[idx]="error";respondio[idx]=turno;sMal();
-    feedback("⏱ Se terminó el tiempo. Era "+it.p+". Pista clave: "+it.k);
-    redJugada("mal","",1);cerrarJugada("mal",it);
-  }else{
-    estado[idx]="pasada";respondio[idx]=turno;sPas();
-    feedback("⏱ Se terminó el tiempo. La "+it.letra+" vuelve más adelante.");
-    redJugada("pasa","",1);cerrarJugada("pas",it);
-  }
+  estado[idx]="error";respondio[idx]=turno;sMal();
+  feedback("⏱ Se terminó el tiempo. Era "+it.p+". Pista clave: "+it.k);
+  redJugada("mal","",1);cerrarJugada("mal",it);
 }
 $("btn-cortar").addEventListener("click",()=>{
   modal("¿Terminar la partida?","El rosco queda cerrado con lo respondido hasta ahora.",
@@ -682,24 +678,39 @@ function guardarHist(pts){
   try{localStorage.setItem("bior-hist",JSON.stringify(h))}catch(e){}
 }
 
-/* ===== CLASIFICACIÓN =====
-   La tabla compartida lee una planilla de Google vía Apps Script (ranking.gs).
-   Mientras RANKING_URL quede vacía muestra las marcas de este celular. */
-const RANKING_URL="";
-const rankingOn=()=>RANKING_URL.indexOf("http")===0;
-async function rankingTraer(top){
-  const r=await fetch(RANKING_URL+"?top="+top);if(!r.ok)throw 0;
+/* ===== BASE DE JUGADORES (Supabase, mismo proyecto que el modo en línea) =====
+   Cada jugador queda registrado por su clave normalizada: junta a la misma
+   persona aunque escriba distinto (sin tildes, doble espacio, letra repetida).
+   La tabla y la función se crean una vez con db/biorosco.sql; si faltan, el
+   juego sigue igual con la clasificación local del celular. */
+const SUPA_URL="https://apehzspwbyqwsrdeezrn.supabase.co";
+const SUPA_KEY="sb_publishable_GX9QGXoB3IuHbuLMKsgwgw_IVhGy0KL";
+let dbActiva=true;
+function dbFetch(path,init){
+  return fetch(SUPA_URL+path,Object.assign({headers:{apikey:SUPA_KEY,Authorization:"Bearer "+SUPA_KEY,"Content-Type":"application/json"}},init||{}))
+    .then(r=>{if(r.status===400||r.status===401||r.status===404)dbActiva=false;return r;});
+}
+const aprieta=s=>s.split(" ").map(w=>w.replace(/(.)\1+/g,"$1")).join(" ");
+const claveJugador=(n,a)=>aprieta(norma(n+" "+a));
+function dbSumar(jp){
+  if(!dbActiva||modoPractica())return;
+  const pf=perfilLeer(),n=pf.nombre||(nombres[jp]||"").split(" ")[0]||"",a=pf.apellido||"";
+  if(!n)return;
+  return dbFetch("/rest/v1/rpc/biorosco_sumar",{method:"POST",body:JSON.stringify({
+    p_clave:claveJugador(n,a),p_nombre:nombreBonito(n),p_apellido:nombreBonito(a),
+    p_seccion:seccion,p_avatar:avatarIdx,
+    p_puntos:Math.max(0,puntaje(jp)),p_aciertos:puntos[jp]})}).catch(()=>{});
+}
+async function dbRanking(){
+  if(!dbActiva)throw 0;
+  const r=await dbFetch("/rest/v1/biorosco_jugadores?select=nombre,apellido,seccion,avatar,puntos,aciertos,partidas&order=puntos.desc&limit=100");
+  if(!r.ok)throw 0;
   return await r.json();
 }
-function rankingEnviar(){
-  if(!rankingOn()||modoPractica())return Promise.resolve();
-  const pf=perfilLeer(),jp=enLinea?yo:0;
-  const body={juego:"BIOROSCO",nombre:pf.nombre||nombres[jp].split(" ")[0],apellido:pf.apellido||"",
-    seccion:seccion,avatar:avatarIdx,modo:enLinea?"en línea":conBot?"vs Boti":"solo",
-    aciertos:puntos[jp],errores:estado.filter((s,k)=>s==="error"&&respondio[k]===jp).length,
-    pasadas:estado.filter((s,k)=>s==="pasada"&&respondio[k]===jp).length,total:items.length,
-    puntos:puntaje(jp),tiempo_seg:Math.round(usado[jp]/100)/10,inicio:letraIni};
-  return fetch(RANKING_URL,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify(body)}).catch(()=>{});
+
+/* ===== CLASIFICACIÓN ===== */
+function rankingEnviar(){ /* compat: la escritura real la hace dbSumar */
+  return dbSumar(enLinea?yo:0)||Promise.resolve();
 }
 let rankTab="";
 $("tabs").addEventListener("click",e=>{const b=e.target.closest(".tab");if(!b)return;
@@ -714,24 +725,22 @@ async function mostrarRanking(){
 async function pintarRanking(){
   const cuerpo=$("rank-cuerpo"),fuente=$("rank-fuente");
   let lista=null;
-  if(rankingOn()){
+  if(dbActiva){
     try{
-      const raw=await rankingTraer(200);
+      const raw=await dbRanking();
       lista=raw.map(x=>({n:nombreBonito((x.nombre||"")+" "+(x.apellido||"")),s:x.seccion||"",a:Math.max(0,Math.min(AVATAR_BOTI,+x.avatar||0)),
         pts:+x.puntos||0,ok:+x.aciertos||0,partidas:+x.partidas||1}));
-      lista.sort((a,b)=>b.pts-a.pts||b.ok-a.ok||(a.partidas-b.partidas));
-      fuente.textContent="Se actualiza cada vez que alguien termina una partida.";
-    }catch(e){
-      cuerpo.innerHTML='<p class="vacio">No se pudo leer la planilla. Probá de nuevo en un ratito.</p>';fuente.textContent="";return;
-    }
-  }else{
+      fuente.textContent="Clasificación compartida: se actualiza cada vez que alguien termina una partida.";
+    }catch(e){lista=null;}
+  }
+  if(!lista){
     const por={};
     histLeer().forEach(x=>{
       const k=norma(x.n)+"|"+norma(x.s);
       if(!por[k])por[k]={n:nombreBonito(x.n),s:x.s,a:x.a,pts:0,ok:0,partidas:0};
       por[k].pts+=x.pts;por[k].ok+=x.ok;por[k].partidas++;por[k].a=x.a;});
     lista=Object.keys(por).map(k=>por[k]).sort((a,b)=>b.pts-a.pts||b.ok-a.ok);
-    fuente.textContent="La clasificación del curso se activa cuando la profe conecte la planilla. Estas son las marcas de este celular.";
+    fuente.textContent="La clasificación del curso se activa cuando la profe conecte la base. Estas son las marcas de este celular.";
   }
   const fil=lista.filter(x=>!rankTab||norma(x.s)===norma(rankTab));
   if(!fil.length){
