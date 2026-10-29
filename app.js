@@ -460,7 +460,7 @@ function cerrarJugada(res,it){
   const col=res==="ok"?"var(--verde)":res==="mal"?"var(--rojo)":"var(--azul)";
   const ico=res==="ok"?ICO.check:res==="mal"?ICO.equis:ICO.giro;
   centroHTML('<div class="res-card"><span class="res-ico" style="background:'+col+'">'+ico+'</span>'+
-    '<b>'+it.p+'</b>'+
+    (res==="pas"?'<b>Pasapalabra</b>':'<b>'+it.p+'</b>')+
     (res==="mal"?'<span class="clave">Pista clave: '+escH(it.k)+"</span>":res==="pas"?'<span>Vuelve en la próxima vuelta</span>':"")+
     "</div>");
   pintar();
