@@ -1191,3 +1191,6 @@ $("chat-form").addEventListener("submit",e=>{e.preventDefault();chatEnviar($("ch
 })();
 
 pintarSonido();pintarVoz();pintarModo();
+
+/* PWA: instalar como app para jugar a pantalla completa */
+if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}
