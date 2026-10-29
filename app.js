@@ -21,8 +21,8 @@ novoz:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="
 sol:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3L17 7M7 17l-1.7 1.7"/></svg>',
 luna:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>'};
 
-/* ===== AVATARES (los mismos del Pasapalabra Bio) ===== */
-const AVATARES=["nene","risos","moreno","lentes","colitas","media","nena2","boti"];
+/* ===== AVATARES (fauna del NOA + Boti) ===== */
+const AVATARES=["flamenco","tapir","jaguar","tucan","vicuna","nandu","boti"];
 const AVATAR_BOTI=AVATARES.length-1;
 const avSrc=i=>"avatares/"+AVATARES[i]+".webp";
 const escH=s=>String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]);
