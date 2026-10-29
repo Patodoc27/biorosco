@@ -180,12 +180,18 @@ svg{display:block}
   box-shadow:0 4px 10px -4px rgba(0,0,0,.6);transition:background .25s,border-color .25s,transform .25s,box-shadow .25s}
 .letra .bd{position:absolute;right:-14%;top:-14%;width:46%;height:46%;border-radius:50%;display:none;place-items:center;border:1.5px solid rgba(255,255,255,.85)}
 .letra .bd svg{width:70%;height:70%}
-.letra.acierto{background:linear-gradient(160deg,#4BE38E,#139E55);border-color:#8DF5B8;color:#fff;box-shadow:0 0 16px -3px rgba(63,217,124,.9)}
-.letra.acierto .bd{display:grid;background:var(--verde)}
+/* acierto: la letra toma el color de quien la resolvió (turquesa j1, rosa j2/Boti) */
+.letra.acierto.j1{background:linear-gradient(160deg,color-mix(in srgb,var(--j1) 80%,#fff),color-mix(in srgb,var(--j1) 78%,#03252B));border-color:#9FFBF0;color:#fff;box-shadow:0 0 16px -3px color-mix(in srgb,var(--j1) 85%,transparent)}
+.letra.acierto.j2{background:linear-gradient(160deg,color-mix(in srgb,var(--j2) 80%,#fff),color-mix(in srgb,var(--j2) 78%,#2B0316));border-color:#FFC2DE;color:#fff;box-shadow:0 0 16px -3px color-mix(in srgb,var(--j2) 85%,transparent)}
 .letra.error{background:linear-gradient(160deg,#FF6B78,#D21F38);border-color:#FFB0B8;color:#fff;box-shadow:0 0 16px -3px rgba(255,77,94,.9)}
-.letra.error .bd{display:grid;background:var(--rojo)}
+.letra.error.j1{border-color:var(--j1)}
+.letra.error.j2{border-color:var(--j2)}
 .letra.pasada{background:linear-gradient(160deg,#5AA8FF,#2D63C8);border-color:#B5D6FF;color:#fff}
-.letra.pasada .bd{display:grid;background:var(--azul)}
+.letra.pasada.j1{border-color:var(--j1)}
+.letra.pasada.j2{border-color:var(--j2)}
+.letra.acierto .bd,.letra.error .bd,.letra.pasada .bd{display:grid}
+.letra.j1 .bd{background:var(--j1)}
+.letra.j2 .bd{background:var(--j2)}
 .letra.activa{transform:translate(-50%,-50%) scale(1.28);z-index:2;border:2.5px solid #9FFBF0;background:linear-gradient(160deg,#2AF0DA,#0A9DB5);color:#fff;
   box-shadow:0 0 0 4px rgba(25,227,208,.25),0 0 26px 2px rgba(25,227,208,.75)}
 .centro{position:absolute;left:50%;top:50%;width:66%;height:62%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px;overflow:hidden}

@@ -297,7 +297,7 @@ function pintar(){
   const dic={acierto:"acertada",error:"errada",pasada:"pasapalabra",pendiente:"pendiente"};
   estado.forEach((s,i)=>{
     const el=$("L"+i);if(!el)return;
-    el.className="letra"+(s!=="pendiente"?" "+s:"")+(i===idx&&jugando?" activa":"");
+    el.className="letra"+(s!=="pendiente"?" "+s:"")+(respondio[i]>=0?" j"+(respondio[i]+1):"")+(i===idx&&jugando?" activa":"");
     $("B"+i).innerHTML=BD[s]||"";
     el.setAttribute("aria-label",items[i].letra+", "+dic[s]);
   });
